@@ -1,0 +1,343 @@
+import pandas as pd
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, accuracy_score
+df = pd.read_csv("customer_support_dataset.csv")
+# Display first few rows
+print("Sample data:")
+print(df.head())
+print("\nColumns:", df.columns.tolist())
+df.info()
+import pandas as pd
+# Load the dataset
+df = pd.read_csv('/content/customer_support_dataset.csv')
+# Check for missing values
+missing_values = df.isnull().sum()
+print("Missing Values in each column:\n", missing_values)
+print(df.isnull().sum())
+print("\n🔁 Number of duplicate rows:", df.duplicated().sum())
+import seaborn as sns
+import matplotlib.pyplot as pltfrom collections import Counter
+import seaborn as sns
+import matplotlib.pyplot as plt
+# ... (other code) ...
+# 3. Top 10 Most Frequent Customer Queries
+top_queries = Counter(" ".join(df['Query']).split()).most_common(10) # change df['query'] to df['Query']
+query_words, query_counts = zip(*top_queries)
+plt.figure(figsize=(10, 6))
+sns.barplot(x=list(query_words), y=list(query_counts))  # Convert to lists
+plt.title('Top 10 Most Frequent Words in Customer Queries')
+plt.xticks(rotation=45, ha='right')
+plt.ylabel('Frequency')
+plt.show()
+# ... (rest of the code) ...
+# Assuming 'Category' is the column name for the target variable
+target_column = 'Query'  # Replace 'Category' with the actual target column if different
+# Features will be all columns except the target
+# We need to ensure the column name exists in the DataFrame
+if target_column in df.columns:
+    X = df.drop(columns=[target_column])  # Features
+    y = df[target_column]  # Target
+  # Check the first few rows of features and target
+    print("Features:\n", X.head())
+    print("\nTarget:\n", y.head())
+else:
+    print(f"Error: The target column '{target_column}' was not found in the DataFrame.")
+    print("Available columns:", df.columns.tolist())
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+# Load the dataset
+df = pd.read_csv('/content/customer_support_dataset.csv')
+# Get actual categorical columns from your DataFrame
+categorical_columns = df.select_dtypes(include=['object']).columns.tolist()# Print the identified categorical columns
+print("Categorical columns:", categorical_columns)
+# Create a ColumnTransformer to apply OneHotEncoding to categorical features
+ct = ColumnTransformer(
+    transformers=[
+        ('onehot', OneHotEncoder(sparse_output=False, handle_unknown='ignore'), categorical_columns)
+    ],
+    remainder='passthrough'  # Keep numerical features as they are
+)
+# Fit and transform the data
+encoded_data = ct.fit_transform(df)
+# Get feature names after OneHotEncoding
+feature_names = ct.get_feature_names_out(input_features=df.columns)
+# Create a new DataFrame with encoded data and feature names
+encoded_df = pd.DataFrame(encoded_data, columns=feature_names)
+# Show the updated DataFrame
+print(encoded_df.head())
+import pandas as pd
+# Load the dataset
+df = pd.read_csv('/content/customer_support_dataset.csv')
+# Print the available columns in your DataFrame
+print("Available columns in the DataFrame:", df.columns)
+# Identify categorical columns (Replace with your actual categorical column names)
+# Inspect the output of the previous print statement and choose the actual column names
+categorical_columns = ['Query', 'Response']  # Replace 'Product', 'Category' if needed
+# Perform One-Hot Encoding
+df_encoded = pd.get_dummies(df, columns=categorical_columns, drop_first=True)
+# Show the first few rows of the encoded dataframe
+print(df_encoded.head())
+from sklearn.model_selection import train_test_split
+import pandas as pd
+# Load the dataset
+df = pd.read_csv('/content/customer_support_dataset.csv')
+# Ensure 'Response' is the actual target column name, update if needed
+target_column = 'Response'
+# Separate the features (X) and target (y)
+# Try-except block to handle potential KeyError
+try:
+    X = df.drop(columns=[target_column])  # Features
+    y = df[target_column]  # Target
+except KeyError as e:
+    print(f"Error: {e}")
+    print("Available columns in the DataFrame:", df.columns.tolist())
+    # Handle the error appropriately, e.g., exit or choose a different target column
+# Perform the train-test split if the target column was found
+if 'X' in locals() and 'y' in locals():
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # Display the shape of the resulting datasets
+    print(f"Training data shape: X_train={X_train.shape}, y_train={y_train.shape}")
+    print(f"Test data shape: X_test={X_test.shape}, y_test={y_test.shape}")
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+# Load the dataset
+df = pd.read_csv('/content/customer_support_dataset.csv')
+# Assuming 'Response' is your target column
+target_column = 'Response'
+# 1. Separate features and target
+X = df.drop(columns=[target_column])
+y = df[target_column]
+# 2. Encode the target variable using LabelEncoder
+label_encoder = LabelEncoder()
+y_encoded = label_encoder.fit_transform(y)
+# 3. One-hot encode categorical features in X
+categorical_features = X.select_dtypes(include=['object']).columns
+X_encoded = pd.get_dummies(X, columns=categorical_features, drop_first=True)
+# 4. Scale numerical features in X_encoded
+numerical_features = X_encoded.select_dtypes(exclude=['object']).columns
+scaler = StandardScaler()
+X_encoded[numerical_features] = scaler.fit_transform(X_encoded[numerical_features])
+# 5. Train-test split using the encoded data
+X_train, X_test, y_train, y_test = train_test_split(X_encoded, y_encoded, test_size=0.2, random_state=42)
+# 6. Model building and training
+model = LogisticRegression()
+model.fit(X_train, y_train)
+# 7. Predictions
+y_pred = model.predict(X_test)
+# 8. Evaluation (Note: y_test needs to be the encoded version for accuracy calculation)
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("Classification Report:\n", classification_report(y_test, y_pred))
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.linear_model import LogisticRegression
+# Load the dataset
+df = pd.read_csv('/content/customer_support_dataset.csv')
+# Assuming 'Response' is your target column
+target_column = 'Response'
+# 1. Separate features and target
+X = df.drop(columns=[target_column])
+y = df[target_column]
+# 2. Encode the target variable using LabelEncoder
+label_encoder = LabelEncoder()
+y_encoded = label_encoder.fit_transform(y)
+# 3. One-hot encode categorical features in X
+categorical_features = X.select_dtypes(include=['object']).columns
+X_encoded = pd.get_dummies(X, columns=categorical_features, drop_first=True)
+# 4. Scale numerical features in X_encoded (if any)
+numerical_features = X_encoded.select_dtypes(exclude=['object']).columns
+scaler = StandardScaler()
+X_encoded[numerical_features] = scaler.fit_transform(X_encoded[numerical_features])
+# 5. Train-test split using the encoded data
+X_train, X_test, y_train, y_test = train_test_split(X_encoded, y_encoded, test_size=0.2, random_state=42)
+# 6. Model building and training
+model = LogisticRegression()
+model.fit(X_train, y_train)
+# Function for predicting customer support response
+def predict_response(query):
+    """Predicts the customer support response for a given query.
+    Args:
+        query (str): The customer's query.
+   Returns:
+        str: The predicted response.
+    """
+    # Create a DataFrame for the query
+    new_query_df = pd.DataFrame([{'Query': query}])
+    # One-hot encode the query using the same encoder used for training data
+    new_query_encoded = pd.get_dummies(new_query_df, columns=['Query'], drop_first=True)
+    # Align columns to match the training data
+    new_query_encoded = new_query_encoded.reindex(columns=X_encoded.columns, fill_value=0)
+    # Make the prediction
+    predicted_class = model.predict(new_query_encoded)[0]
+    # Decode the prediction to get the original response
+    predicted_response = label_encoder.inverse_transform([predicted_class])[0]
+    return predicted_response
+# Example usage
+new_query = "How do I reset my password?"
+predicted_response = predict_response(new_query)
+print("Predicted Response:", predicted_response)
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.linear_model import LogisticRegression
+
+# Load the dataset
+df = pd.read_csv('/content/customer_support_dataset.csv')
+
+# Assuming 'Response' is your target column
+target_column = 'Response'
+
+# 1. Separate features and target
+X = df.drop(columns=[target_column])
+y = df[target_column]
+
+# 2. Encode the target variable using LabelEncoder
+label_encoder = LabelEncoder()
+y_encoded = label_encoder.fit_transform(y)
+
+# 3. One-hot encode categorical features in X
+categorical_features = X.select_dtypes(include=['object']).columns
+X_encoded = pd.get_dummies(X, columns=categorical_features, drop_first=True)
+
+# 4. Scale numerical features in X_encoded (if any)
+# Check if there are numerical features before scaling
+if len(X_encoded.select_dtypes(include=['number']).columns) > 0:
+    numerical_features = X_encoded.select_dtypes(include=['number']).columns
+    scaler = StandardScaler()
+    X_encoded[numerical_features] = scaler.fit_transform(X_encoded[numerical_features])
+
+# 5. Train-test split using the encoded data
+X_train, X_test, y_train, y_test = train_test_split(X_encoded, y_encoded, test_size=0.2, random_state=42)
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.linear_model import LogisticRegression
+# Load the dataset
+df = pd.read_csv('/content/customer_support_dataset.csv')
+# Assuming 'Response' is your target column
+target_column = 'Response'
+# 1. Separate features and target
+X = df.drop(columns=[target_column])
+y = df[target_column]
+# 2. Encode the target variable using LabelEncoder
+label_encoder = LabelEncoder()
+y_encoded = label_encoder.fit_transform(y)
+# 3. One-hot encode categorical features in X
+categorical_features = X.select_dtypes(include=['object']).columns
+X_encoded = pd.get_dummies(X, columns=categorical_features, drop_first=True)
+# 4. Scale numerical features in X_encoded (if any)
+# Check if there are numerical features before scaling
+if len(X_encoded.select_dtypes(include=['number']).columns) > 0:
+    numerical_features = X_encoded.select_dtypes(include=['number']).columns
+    scaler = StandardScaler()
+    X_encoded[numerical_features] = scaler.fit_transform(X_encoded[numerical_features])
+# 5. Train-test split using the encoded data
+X_train, X_test, y_train, y_test = train_test_split(X_encoded, y_encoded, test_size=0.2, random_state=42)
+# 6. Model building and training
+model = LogisticRegression()
+model.fit(X_train, y_train)
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+import joblib
+def predict_grade(new_student: dict, model_path='g3_model.pkl', scaler_path='scaler.pkl', columns_path='model_columns.pkl'):
+    """
+    Predict the final grade (G3) for a new student record.
+    Parameters:
+    - new_student (dict): Input features of the student.
+    - model_path (str): Path to saved trained model (joblib file).
+    - scaler_path (str): Path to saved scaler (joblib file).
+    - columns_path (str): Path to saved column list (joblib file).
+    Returns:
+    - float: Predicted G3 value.
+    """
+    # Load model components
+    model = joblib.load(model_path)
+    scaler = joblib.load(scaler_path)
+    columns = joblib.load(columns_path)
+    # Convert input to DataFrame
+    input_df = pd.DataFrame([new_student])
+    # One-hot encode and align
+    input_encoded = pd.get_dummies(input_df, drop_first=True)
+    input_aligned = input_encoded.reindex(columns=columns, fill_value=0)
+    # Scale
+    input_scaled = scaler.transform(input_aligned)
+    # Predict
+    prediction = model.predict(input_scaled)
+    return round(prediction[0], 2)
+import gradio as gr
+import pandas as pd
+import joblib
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.linear_model import LogisticRegression
+# Load the dataset
+df = pd.read_csv('/content/customer_support_dataset.csv')
+# Assuming 'Response' is your target column
+target_column = 'Response'
+# 1. Separate features and target
+X = df.drop(columns=[target_column])
+y = df[target_column]
+# 2. Encode the target variable using LabelEncoder
+label_encoder = LabelEncoder()
+y_encoded = label_encoder.fit_transform(y)
+# 3. One-hot encode categorical features in X
+categorical_features = X.select_dtypes(include=['object']).columns
+X_encoded = pd.get_dummies(X, columns=categorical_features, drop_first=True)
+# 4. Scale numerical features in X_encoded (if any)
+# Check if there are numerical features before scaling
+if len(X_encoded.select_dtypes(include=['number']).columns) > 0:
+    numerical_features = X_encoded.select_dtypes(include=['number']).columns
+    scaler = StandardScaler()
+    X_encoded[numerical_features] = scaler.fit_transform(X_encoded[numerical_features])
+# 5. Train-test split using the encoded data
+X_train, X_test, y_train, y_test = train_test_split(
+    X_encoded, y_encoded, test_size=0.2, random_state=42)
+# 6. Model building and training
+model = LogisticRegression()
+model.fit(X_train, y_train)
+# Save model components using joblib
+joblib.dump(model, "g3_model.pkl")
+joblib.dump(scaler, "scaler.pkl")  # Assuming you have a scaler
+joblib.dump(X_encoded.columns, "model_columns.pkl")
+def predict_g3(query):
+    # Create a dictionary from inputs
+    student = {"Query": query}  # Adjust to your actual input features
+    # Convert to DataFrame and preprocess
+    df = pd.DataFrame([student])
+    df_encoded = pd.get_dummies(df, drop_first=True)  # One-hot encoding
+    # Align with training data columns
+    df_aligned = df_encoded.reindex(columns=columns, fill_value=0)
+    df_scaled = scaler.transform(df_aligned)  # Scaling
+    # Predict and return
+    prediction = model.predict(df_scaled)[0]
+    # Inverse transform to get original label
+    predicted_response = label_encoder.inverse_transform([prediction])[0]
+    return predicted_response
+# Load model, scaler, and training column names
+model = joblib.load("g3_model.pkl")
+try:
+    scaler = joblib.load("scaler.pkl")
+except FileNotFoundError:
+    scaler = StandardScaler()  # Create a new scaler if file not found
+columns = joblib.load("model_columns.pkl")
+# Gradio Interface
+iface = gr.Interface(
+    fn=predict_g3,
+    inputs=gr.Textbox(lines=2, placeholder="Enter your customer query here..."),
+    outputs="text",
+    title="Customer Support Response Predictor",
+    description="Enter a customer query to get a predicted response.",
+)
+iface.launch()
